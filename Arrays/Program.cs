@@ -1,112 +1,15 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
-namespace SortingArrays
+namespace Chapter3Ex
 {
     public class Program
-    {
-        public class CArray
-        {
-            private int[] array;
-            private int length;
-
-            public CArray(int size)
-            {
-                array = new int[size];
-                length = 0;
-            }
-            public void Insert(int index, int value)
-            {
-                if((index < 0) || (index > length))
-                {
-                    throw new ArgumentOutOfRangeException( nameof(index), "Index out of range.");
-                } 
-                //Resize if full
-
-                if(length >= array.Length)
-                {
-                    Resize(array.Length * 2);
-                }
-
-                //shift elements to the right to make room
-
-                for (int i = length; i > index; i--)
-                {
-                    array[i] = array[i - 1];         
-                }
-                //Insert new value 
-                array[index] = value;
-                length++;
-            }
-
-            public void Delete(int index)
-            { 
-                if(index < 0 || index >= length)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index), "Index out of bounds of array");
-                }
-                //Shift elements to fill the gap
-                for (int i = index; i < length-1 ; i++)
-                {
-                    array[i] = array[i + 1];
-                } 
-                length--;
-            }  
-
-            public void Clear()
-            {
-                length = 0;
-            }
-            //Indexer to get or set the element at a specific index
-            public int this[int index]
-            {
-                get
-                {
-                    if(index < 0 || index >= length)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(index), "Index out of bounds of the array");
-                    }
-                    return array[index];
-                }
-                set
-                {
-                    if (index < 0 || index >= length)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(index), "Index out of bounds of the array");
-                    }
-                    array[index] = value;
-                }
-            } 
-
-            //Resize the internal Array
-            private void Resize(int newSize)
-            {
-                int[] newArray = new int[newSize];
-                for(int i = 0; i < length; i++)
-                {
-                    newArray[i] = array[i];
-                }
-                array = newArray;
-            } 
-
-            public void Display()
-            {
-                for(int i = 0; i < length; i++)
-                {
-                    Console.Write(array[i] + " ");
-                }
-                Console.WriteLine();
-            }
-            public int Length
-            {
-                get { return length; }
-            }
-        }
-
+    { 
         public class Timing
         {
             private TimeSpan startingTime;
@@ -116,8 +19,7 @@ namespace SortingArrays
             {
                 startingTime = new TimeSpan(0);
                 Duration = new TimeSpan(0);
-            } 
-
+            }
             public void Start()
             {
                 GC.Collect();
@@ -129,127 +31,222 @@ namespace SortingArrays
             public void Stop()
             {
                 Duration = Process.GetCurrentProcess().Threads[0].UserProcessorTime.Subtract(startingTime);
-            } 
+            }
+
             public TimeSpan Result()
             {
                 return Duration;
             }
-
         }
         static void Main(string[] args)
         {
-            int numItems = 10000;
-            CArray myArray = new CArray(numItems);
-
-            Random random= new Random();
+            Program program = new Program();    
             Timing timing = new Timing();
-            Program program = new Program();
 
+            //BubbleSort
+            timing.Start();
+            List<string> Data1 = GenerateRandomStrings(20000);
 
+            string filepath1 = "stringData1.txt";
+
+            WritingStringsToFile(Data1, filepath1);
+
+            Console.WriteLine($"Data file created successfully: {Path.GetFullPath(filepath1)}");
+
+            List<string> readStrings1 = ReadingStringsFromFile(filepath1);
+
+            //Display Original Data
+           // Console.WriteLine("Original Data");
+          //  DisplayData(readStrings);
+
+            
            
-            for (int i = 0; i < numItems; i++) {
-                int randomValues = random.Next(0,1000);
-                myArray.Insert(i, randomValues);
-               
-             
-            }
-            timing.Start();
-            program.InsertionSort(myArray);
-          //  myArray.Display(); 
+            program.BubbleSort(readStrings1);
+
+            //Display Sorted Data
+            Console.WriteLine("\nSorted Data");
+            // DisplayData(readStrings);
             timing.Stop();
-            Console.WriteLine($"Duration for InsertionSort:  {timing.Result().TotalMilliseconds}");
-            myArray.Clear();
+            Console.WriteLine($" BubbleSort Process Time in Milliseconds: {timing.Result().Milliseconds}");
 
-            for (int i = 0; i < numItems; i++)
-            {
-                int randomValues = random.Next(0, 100);
-                myArray.Insert(i, randomValues);
-              ;
 
-            }
+            //SelectionSort
             timing.Start();
-            program.BubbleSort(myArray);
-           // myArray.Display();
+            List<string> Data2 = GenerateRandomStrings(20000);
+
+            string filepath2 = "stringData2.txt";
+
+            WritingStringsToFile(Data2, filepath2);
+
+            Console.WriteLine($"Data file created successfully: {Path.GetFullPath(filepath2)}");
+
+            List<string> readStrings2 = ReadingStringsFromFile(filepath2);
+            
+
+          
+            program.SelectionSort(readStrings2);
+
+            //Display Sorted Data
+           // Console.WriteLine("\nSorted Data");
+           // DisplayData(readStrings);
             timing.Stop();
-            Console.WriteLine($"Duration for BubbleSort:  {timing.Result().TotalMilliseconds}");
-            myArray.Clear();
+            Console.WriteLine($" SelectionSort Process Time in Milliseconds: {timing.Result().Milliseconds}");
 
-            for (int i = 0; i < numItems; i++)
-            {
-                int randomValues = random.Next(0, 100);
-                myArray.Insert(i, randomValues);
-           
-
-            }
+            //InsertionSort
             timing.Start();
-            program.SelectionSort(myArray);
-            //myArray.Display();
+            List<string> Data3= GenerateRandomStrings(20000);
+
+            string filepath3 = "stringData3.txt";
+
+            WritingStringsToFile(Data3, filepath3);
+
+            Console.WriteLine($"Data file created successfully: {Path.GetFullPath(filepath3)}");
+
+            List<string> readStrings3 = ReadingStringsFromFile(filepath3);
+       
+            
+            program.InsertionSort(readStrings3);
+
+            //Display Sorted Data
+            Console.WriteLine("\nSorted Data");
+            // DisplayData(readStrings);
             timing.Stop();
-            Console.WriteLine($"Duration for SelectionSort:  {timing.Result().TotalMilliseconds}");
+            Console.WriteLine($" InsertionSort Process Time in Milliseconds: {timing.Result().Milliseconds}");
+
+
         }
-        public void BubbleSort(CArray array)
+        static List<string> GenerateRandomStrings(int count)
         {
-            for(int i = 0; i < array.Length-1; i++)
+            List<string> strings = new List<string>();
+            Random random = new Random();
+            const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+            for (int i = 0; i < count; i++)
             {
-                for (int j = 0; j < array.Length-i-1; j++)
+                int stringLength = random.Next(8, 16);
+                char[] randomstring = new char[stringLength];
+
+                for (int j = 0; j < stringLength; j++)
                 {
-                    if (array[j] > array[j+1])
-                    {
-                        Swap(array, j, j+1);
-                    } 
+                    randomstring[j] = Chars[random.Next(Chars.Length)];
                 }
-                
+                strings.Add(new string(randomstring));
             }
-        } 
+            return strings;
+        }
 
-        public void SelectionSort(CArray array)
+        static void WritingStringsToFile(List<string> Data, string Filepath)
         {
-            for(int i = 0; i< array.Length - 1; i++)
+            using (StreamWriter writer = new StreamWriter(Filepath))
             {
-                int minValue = i;
-
-                for(int j = i+1; j < array.Length; j++)
+                try
                 {
-                    if(array[j] < array[minValue])
+                    foreach (string value in Data)
                     {
-                        minValue = j;
+                        writer.WriteLine(value);
                     }
-                } 
-                if(minValue != i)
-                {
-                    Swap(array, i, minValue);
+
+                }
+                catch (Exception ex) { 
+                    Console.WriteLine($"Error Message: {ex.Message}");
                 }
             }
         }
 
-        public void InsertionSort(CArray array)
+        static List<string> ReadingStringsFromFile(string Filepath)
         {
-            int start = 1;
-            int end = array.Length;
+            List<string> data = new List<string>();
 
-         for(int i =start ; i< end; i++)
+            try
             {
-                int tempValue = array[i];
+                using (StreamReader reader = new StreamReader(Filepath))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                            data.Add(line);
+                     
+                    }
+
+                }
+
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            return data;
+        }
+
+        public void BubbleSort(List<string> Data)
+        {
+            int n = Data.Count;
+            string tempValue;
+
+            for (int i = 0; i < n-1; i++) {
+                for (int j = 0; j <n-i-1; j++) {
+                    if (String.Compare(Data[j], Data[j+1]) > 0 )
+                    {
+                        tempValue = Data[j];
+                        Data[j] = Data[j+1];
+                        Data[j+1] = tempValue;
+                    }
+               }
+            }
+
+        }
+
+        public void SelectionSort(List<string> Data) { 
+         
+            int n = Data.Count;
+            string tempValue;
+
+            for (int i = 0; i < n - 1; i++) {
+               
+                int minIndex = i;
+
+                for (int j = i+1; j < n ; j++) {
+
+                    if (String.Compare(Data[j], Data[minIndex]) < 0)
+                    {
+                        minIndex = j;
+                    }
+
+                    if (minIndex != i)
+                    {
+                        tempValue = Data[minIndex];
+                        Data[minIndex] = Data[i];
+                        Data[i] = tempValue;
+                    }
+                }
+            }
+        }
+
+        public void InsertionSort(List<string> Data) {
+
+            int n = Data.Count;
+
+            for (int i = 1; i < n - 1; i++)
+            {
+                string tempValue = Data[i];
 
                 int j = i - 1;
 
-                while(j>= 0 && array[j] > tempValue)
+                while (j >= 0 && String.Compare(tempValue, Data[j]) < 0)
                 {
-                    array[j+1] = array[j];
+                    Data[j + 1] = Data[j];
                     j--;
-                } 
-                array[j+1] = tempValue;
+                }
+                Data[j + 1] = tempValue;
             }
         }
-        public void Swap(CArray array, int a, int b)
+
+        static void DisplayData(List<string> data)
         {
-            int tempValue;
-                tempValue = array[a];
-                array[a] = array[b];
-                array[b] = tempValue;
-            
+            foreach(string value in data)
+            {
+                Console.WriteLine(value +" ");
+            } 
+            Console.WriteLine();
         }
-    } 
-
     }
-
+}
